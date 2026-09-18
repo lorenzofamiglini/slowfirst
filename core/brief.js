@@ -132,6 +132,13 @@ export function steps(md) {
   return { text: all.join('\n'), planned: all.length, done: all.filter((b) => /^[-*]\s+\[[xX]\]/.test(b)).length };
 }
 
+/** How the beliefs in the brief ended up. @param {string} md */
+export function beliefs(md) {
+  const all = bullets(sections(md)['beliefs']);
+  const count = (/** @type {string} */ tag) => all.filter((b) => new RegExp(`\\[${tag}\\]`, 'i').test(b)).length;
+  return { observed: count('observed'), assumed: count('assumed'), refuted: count('refuted') };
+}
+
 /** The human's estimate for the whole task, in lines. @param {string} md */
 export function estimate(md) {
   const match = (sections(md)['steps'] ?? []).join('\n').match(/estimate:\s*~?(\d+)/i);

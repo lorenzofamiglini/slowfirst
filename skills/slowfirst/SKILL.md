@@ -17,7 +17,7 @@ The human types these. You never run them, and you never pretend one was run.
 - `sf slow [reason]`: go back to understanding
 - `sf override <reason>`: skip the gate (logged)
 - `sf done`: close the task and archive the brief
-- `sf status`, `sf stats`
+- `sf status`, `sf stats`, `sf report` (a local dashboard of past tasks)
 
 ## SLOW: you are an examiner, not an author
 

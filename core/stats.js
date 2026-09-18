@@ -1,7 +1,7 @@
 // @ts-check
 // Measurement is local: everything here is computed from the repo's own log.
 
-import { steps as briefSteps } from './brief.js';
+import { steps as briefSteps, beliefs as briefBeliefs } from './brief.js';
 
 /**
  * @param {import('./store.js').Event[]} events
@@ -130,6 +130,11 @@ export function taskSignals(events, md, diff, now = new Date()) {
     shellWritesInSlow: s.shellWritesInSlow,
     stateRestored: s.stateRestored,
     intentChanges: s.intentChanges,
+    // Work that a budget stopped, and beliefs that turned out to be false: the
+    // moments where drift was caught instead of followed.
+    budgetStops: task.filter((e) => e.type === 'phase' && e.via === 'budget').length,
+    beliefsRefuted: briefBeliefs(md).refuted,
+    beliefsObserved: briefBeliefs(md).observed,
   };
 }
 

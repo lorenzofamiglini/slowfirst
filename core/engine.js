@@ -13,6 +13,7 @@ import * as brief from './brief.js';
 import * as memory from './memory.js';
 import { snapshot, changedSince, diffStat } from './git.js';
 import { computeStats, formatStats, taskSignals } from './stats.js';
+import { buildReport, renderReport } from './report.js';
 
 /**
  * @typedef {{ kind: 'edit', paths: string[] } | { kind: 'shell', command: string } | { kind: 'other', name: string }} ToolCall
@@ -23,7 +24,7 @@ import { computeStats, formatStats, taskSignals } from './stats.js';
  * @typedef {{ now?: Date, harness?: string }} Env
  */
 
-const COMMAND = /^\s*sf\s+(init|intent|fast|trivial|slow|override|done|status|stats)(?:\s+([\s\S]*?))?\s*$/i;
+const COMMAND = /^\s*sf\s+(init|intent|fast|trivial|slow|override|done|status|stats|report)(?:\s+([\s\S]*?))?\s*$/i;
 const STEP_BUDGET = 200; // lines in one step before slowfirst says something
 const TRIVIAL = { files: 1, lines: 20 };
 // These two patterns only give the model a clear early answer for the obvious
@@ -190,8 +191,23 @@ export function handleUserInput(root, text, env = {}) {
 
     case 'stats':
       return { message: formatStats(computeStats(state.events, env.now), memory.episodes()) };
+
+    case 'report':
+      return { message: `Dashboard written to ${writeReport(env.now)}. Open it in a browser.` };
   }
   return null;
+}
+
+/**
+ * Build the local dashboard from the personal memory.
+ * @param {Date} [now]
+ * @returns {string} the file it was written to
+ */
+export function writeReport(now) {
+  const file = path.join(memory.home(), 'report.html');
+  fs.mkdirSync(memory.home(), { recursive: true });
+  fs.writeFileSync(file, renderReport(buildReport(memory.episodes(), now)));
+  return file;
 }
 
 /** @param {string} root @param {Env} env @returns {InputResult} */

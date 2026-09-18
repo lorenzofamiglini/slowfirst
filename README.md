@@ -103,6 +103,7 @@ You type these in the prompt. The AI can't run them, so it can't unlock itself.
 | `sf done` | Close the task, archive the brief, and start the next task in SLOW |
 | `sf status` | Show the phase, the intent, and what the gate still needs |
 | `sf stats` | Show overrides, gate results and time per phase |
+| `sf report` | Build the local dashboard from your personal memory |
 
 The same commands work in a terminal from a clone of this repo:
 `node bin/slowfirst.js <command>`. An npm package will come later. Commands that loosen
@@ -174,6 +175,28 @@ threshold, because the same number means different things in different codebases
 
 Any rule built on these signals will be backtested by replaying past logs before it
 ships: does it catch the bad tasks, how early, and does it stay quiet on the good ones?
+
+## The dashboard
+
+`sf report` in your agent, or `node bin/slowfirst.js report --open` in a terminal,
+builds a single local HTML page from your personal memory: no scripts, no network, light
+and dark.
+
+It keeps three kinds of number apart, on purpose:
+
+- **Measured:** hours per week split by how you labelled each task, the median time the
+  gate costs you, overrides and failed gate attempts.
+- **Caught:** beliefs that turned out false, work that was stopped or sent back, files
+  touched that no step named. Each is a moment the work could have carried on in the
+  wrong direction.
+- **Estimated:** one number, "rework avoided", with its assumption printed next to it.
+  It only appears once you have labelled at least three tasks `waste`, so the
+  multiplier comes from your own history.
+
+There is no "time saved" figure. Nobody can measure how long a task would have gone on
+had it not been stopped, and an invented number is the first thing a sceptical
+colleague would pull apart. The number to watch is the one you can measure: **hours in
+tasks you called drift or waste**, going down.
 
 ## Measurement
 
