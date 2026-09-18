@@ -26,6 +26,20 @@ starting with a Claude Code plugin.
 Requires Node.js 18 or later on your `PATH`. slowfirst is opt-in per repository and does
 nothing until you type `sf init` in a session inside that repo.
 
+## Install (Codex CLI, Gemini CLI)
+
+These adapters follow each tool's published hook docs and are covered by unit tests.
+They haven't been run against the live CLIs yet, so please report what breaks.
+
+1. Clone this repo.
+2. Copy the hook config into your tool's settings, replacing `<path-to-slowfirst>` with
+   the path to your clone:
+   - **Codex CLI:** [`adapters/codex/hooks.json`](adapters/codex/hooks.json) goes in
+     `~/.codex/hooks.json` or `<repo>/.codex/hooks.json`.
+   - **Gemini CLI:** the `hooks` block in
+     [`adapters/gemini/settings.json`](adapters/gemini/settings.json) goes in your
+     Gemini `settings.json`.
+
 ## A session
 
 ```
@@ -152,28 +166,27 @@ An adapter needs a harness that can do four things:
 Surveyed in September 2026. ✓ means confirmed in the tool's official docs or source.
 Check the linked docs before relying on this table.
 
-| Tool | Block edits | Around shell | Catch the prompt | Add context | Enforcement possible |
-|---|---|---|---|---|---|
-| [Claude Code](https://code.claude.com/docs/en/hooks) | ✓ | ✓ | ✓ | ✓ | full (adapter included) |
-| [pi](https://github.com/badlogic/pi-mono/blob/main/packages/coding-agent/docs/extensions.md) | ✓ | ✓ | ✓ | ✓ | full |
-| [Codex CLI](https://learn.chatgpt.com/docs/hooks) | ✓ | ✓ | ✓ | ✓ | full |
-| [Gemini CLI](https://geminicli.com/docs/hooks/reference) | ✓ | ✓ | ✓ | ✓ | full |
-| [Kiro](https://kiro.dev/docs/hooks/actions) | ✓ | ✓ | ✓ | ✓ | full |
-| [Cursor](https://cursor.com/docs/agent/hooks) | ✓ | ✓ | ✓ | session start only | nearly full |
-| [Windsurf](https://docs.devin.ai/desktop/cascade/hooks) | ✓ | ✓ | ✓ | ✗ | partial |
-| [Copilot CLI](https://docs.github.com/en/copilot/reference/hooks-configuration) | ✓ | ✓ | ✗ | ✓ | partial |
-| [OpenCode](https://opencode.ai/docs/plugins), [Amp](https://ampcode.com/manual/plugin-api) | ✓ | ✓ | sees it, can't stop it | ✓ | partial |
-| Roo Code, Aider, Zed's own agent | ✗ | ✗ | ✗ | ✗ | guidance only (`SKILL.md` / `AGENTS.md`) |
+| Tool | Block edits | Around shell | Catch the prompt | Add context | Enforcement possible | Adapter |
+|---|---|---|---|---|---|---|
+| [Claude Code](https://code.claude.com/docs/en/hooks) | ✓ | ✓ | ✓ | ✓ | full | ✓ tested in Claude Code |
+| [Codex CLI](https://learn.chatgpt.com/docs/hooks) | ✓ | ✓ | ✓ | ✓ | full | ✓ unit-tested, not yet run live |
+| [Gemini CLI](https://geminicli.com/docs/hooks/reference) | ✓ | ✓ | ✓ | ✓ | full | ✓ unit-tested, not yet run live |
+| [pi](https://github.com/badlogic/pi-mono/blob/main/packages/coding-agent/docs/extensions.md) | ✓ | ✓ | ✓ | ✓ | full | planned |
+| [Kiro](https://kiro.dev/docs/hooks/actions) | ✓ | ✓ | ✓ | ✓ | full | wanted |
+| [Cursor](https://cursor.com/docs/agent/hooks) | ✓ | ✓ | ✓ | session start only | nearly full | wanted |
+| [Windsurf](https://docs.devin.ai/desktop/cascade/hooks) | ✓ | ✓ | ✓ | ✗ | partial | wanted |
+| [Copilot CLI](https://docs.github.com/en/copilot/reference/hooks-configuration) | ✓ | ✓ | ✗ | ✓ | partial | wanted |
+| [OpenCode](https://opencode.ai/docs/plugins), [Amp](https://ampcode.com/manual/plugin-api) | ✓ | ✓ | sees it, can't stop it | ✓ | partial | wanted |
+| Roo Code, Aider, Zed's own agent | ✗ | ✗ | ✗ | ✗ | guidance only (`SKILL.md` / `AGENTS.md`) | n/a |
 
-Codex CLI and Gemini CLI use hook events close to Claude Code's, so each should be a
-small adapter.
+Each adapter is about 70 lines. See [adapters/](adapters/).
 
 ## Roadmap
 
 - **0.2** Step budgets: per step, and the total against your estimate. Also the
   trivial lane.
-- **0.3** Adapters for Codex CLI, Gemini CLI and pi. pi's extension API can also remove
-  tools and replace compaction, so no fork is needed.
+- **0.3** Codex CLI and Gemini CLI adapters run live, and a pi adapter. pi's extension
+  API can also remove tools and replace compaction, so no fork is needed.
 - **0.4** Git pre-commit hook and a GitHub Action.
 - **Evaluation.** A held-out set of incidents and a set of control tasks that must not
   be slowed; see [PROTOCOL.md](PROTOCOL.md#evaluation-staying-general).

@@ -1,0 +1,22 @@
+{
+  "hooks": {
+    "SessionStart": [
+      { "hooks": [{ "type": "command", "command": "node <path-to-slowfirst>/adapters/codex/hook.js" }] }
+    ],
+    "UserPromptSubmit": [
+      { "hooks": [{ "type": "command", "command": "node <path-to-slowfirst>/adapters/codex/hook.js" }] }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash|apply_patch|Edit|Write",
+        "hooks": [{ "type": "command", "command": "node <path-to-slowfirst>/adapters/codex/hook.js" }]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [{ "type": "command", "command": "node <path-to-slowfirst>/adapters/codex/hook.js" }]
+      }
+    ]
+  }
+}

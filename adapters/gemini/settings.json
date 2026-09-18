@@ -1,0 +1,22 @@
+{
+  "hooks": {
+    "SessionStart": [
+      { "hooks": [{ "type": "command", "command": "node <path-to-slowfirst>/adapters/gemini/hook.js" }] }
+    ],
+    "BeforeAgent": [
+      { "hooks": [{ "type": "command", "command": "node <path-to-slowfirst>/adapters/gemini/hook.js" }] }
+    ],
+    "BeforeTool": [
+      {
+        "matcher": "write_file|replace|run_shell_command",
+        "hooks": [{ "type": "command", "command": "node <path-to-slowfirst>/adapters/gemini/hook.js" }]
+      }
+    ],
+    "AfterTool": [
+      {
+        "matcher": "run_shell_command",
+        "hooks": [{ "type": "command", "command": "node <path-to-slowfirst>/adapters/gemini/hook.js" }]
+      }
+    ]
+  }
+}
