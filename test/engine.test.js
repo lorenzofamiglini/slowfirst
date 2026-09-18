@@ -9,6 +9,8 @@ import * as engine from '../core/engine.js';
 import { readLog, currentState } from '../core/store.js';
 import { makeRepo, completeBrief, writeBrief } from './helpers.js';
 
+import * as memory from '../core/memory.js'; // helpers.js points it at a temp directory
+
 const sf = (root, text) => engine.handleUserInput(root, text);
 const edit = (root, file) => engine.checkToolCall(root, { kind: 'edit', paths: [path.join(root, file)] });
 const shell = (root, command) => engine.checkToolCall(root, { kind: 'shell', command });
@@ -208,10 +210,47 @@ test('shell commands are not tracked during FAST', () => {
   assert.equal(engine.afterShell(root, 'call-1'), null);
 });
 
+test('done asks for one word about how the task went', () => {
+  const root = readyRepo();
+  sf(root, 'sf fast');
+  const asked = sf(root, 'sf done');
+  assert.match(asked.message, /sf done ok\s+went as expected/);
+  assert.equal(phase(root), 'fast', 'the task is not closed until it is labelled');
+});
+
+test('a finished task is remembered as numbers, with no prompt text or code', () => {
+  const root = readyRepo();
+  engine.noteTurn(root, 'can you look at the exporter first?');
+  fs.writeFileSync(path.join(root, 'src', 'app.js'), 'export const x = 2;\n');
+  engine.afterEdit(root, path.join(root, 'src', 'app.js'));
+  sf(root, 'sf fast');
+  sf(root, 'sf done drift');
+
+  const episode = memory.episodes().at(-1);
+  assert.equal(episode.label, 'drift');
+  assert.equal(episode.signals.turns, 1);
+  assert.equal(episode.signals.edits, 1);
+  assert.equal(episode.signals.added, 1);
+  assert.equal(episode.signals.filesTouched, 1);
+  assert.equal(episode.signals.undeclaredFiles, 0, 'src/app.js is named in the steps');
+  assert.doesNotMatch(JSON.stringify(episode), /exporter|export const/, 'no prompt text, no code');
+  assert.match(sf(root, 'sf stats').message, /Personal memory: \d+ finished tasks \(ok \d+, drift [1-9]/);
+});
+
+test('work on files no step mentions is counted as undeclared', () => {
+  const root = readyRepo();
+  sf(root, 'sf fast');
+  engine.afterEdit(root, path.join(root, 'src', 'app.js'));
+  fs.writeFileSync(path.join(root, 'src', 'billing.js'), 'export const rate = 1;\n');
+  engine.afterEdit(root, path.join(root, 'src', 'billing.js'));
+  sf(root, 'sf done ok');
+  assert.equal(memory.episodes().at(-1).signals.undeclaredFiles, 1);
+});
+
 test('done archives the brief and starts the next task in SLOW', () => {
   const root = readyRepo();
   sf(root, 'sf fast');
-  const result = sf(root, 'sf done');
+  const result = sf(root, 'sf done ok');
   const archived = result.message.match(/archived to (\S+)\./)[1];
   assert.match(fs.readFileSync(path.join(root, archived), 'utf8'), /change x to 2/);
   const state = currentState(readLog(root));

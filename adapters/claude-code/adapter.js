@@ -36,6 +36,7 @@ export function handle(input, root, now) {
 
   if (event === 'UserPromptSubmit') {
     // The prompt the human typed. This is the only channel that can change the phase.
+    engine.noteTurn(root, String(input.prompt ?? ''), env);
     const result = engine.handleUserInput(root, String(input.prompt ?? ''), env);
     if (result && !result.context) return { decision: 'block', reason: result.message };
     const context = [result?.context, engine.turnContext(root)].filter(Boolean).join('\n\n');
@@ -56,9 +57,14 @@ export function handle(input, root, now) {
     return null; // no opinion: the normal permission flow applies
   }
 
-  if (event === 'PostToolUse' && SHELL_TOOLS.has(input.tool_name)) {
-    const note = engine.afterShell(root, String(input.tool_use_id ?? ''), env);
-    return note ? { decision: 'block', reason: note } : null;
+  if (event === 'PostToolUse') {
+    if (SHELL_TOOLS.has(input.tool_name)) {
+      const note = engine.afterShell(root, String(input.tool_use_id ?? ''), env);
+      return note ? { decision: 'block', reason: note } : null;
+    }
+    const call = toToolCall(input.tool_name, input.tool_input);
+    if (call.kind === 'edit') for (const file of call.paths) engine.afterEdit(root, file, env);
+    return null;
   }
 
   return null;

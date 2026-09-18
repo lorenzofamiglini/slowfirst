@@ -113,6 +113,30 @@ exactly what the Claude Code plugin does:
   structure; the understanding comes from doing the teach-back honestly.
   `sf override` is always there, and always logged.
 
+## Signals and personal memory
+
+Drift shows up in numbers before anyone names it: files nobody planned to touch, a
+change several times the estimate, fix after fix with no confirmed cause, your own turns
+shrinking to "ok, continue".
+
+From 0.2 slowfirst records those numbers. It does not act on them yet.
+
+- **In the repo's log:** each turn (its length, never its text), each edit (the file and
+  the size of the change so far), and the existing gate, override and phase events.
+- **In your personal memory** at `~/.slowfirst/episodes.jsonl`, shared across every repo
+  you work in: one record per finished task, with how you labelled it at `sf done`
+  (`ok`, `drift` or `waste`) and its signals.
+- **Numbers and paths only.** Your prompts and your code never leave the repo, and
+  nothing leaves your machine.
+
+The label is the point. With enough labelled tasks, a later version can compare a
+running task against your own past ones and say "this looks like a task you called
+*waste*, and here is the signal that matched". Personal history beats a global
+threshold, because the same number means different things in different codebases.
+
+Any rule built on these signals will be backtested by replaying past logs before it
+ships: does it catch the bad tasks, how early, and does it stay quiet on the good ones?
+
 ## Measurement
 
 `sf stats` reads the local log. Nothing leaves your machine.
@@ -183,8 +207,10 @@ Each adapter is about 70 lines. See [adapters/](adapters/).
 
 ## Roadmap
 
-- **0.2** Step budgets: per step, and the total against your estimate. Also the
-  trivial lane.
+- **0.2** Signals and personal memory (done: recording only). Next: step budgets, per
+  step and total against your estimate, and the trivial lane.
+- **0.2.x** A replay tool, so any rule can be backtested on past logs. Then nudges from
+  the signals, measured by whether you accept or dismiss them, and only then stops.
 - **0.3** Codex CLI and Gemini CLI adapters run live, and a pi adapter. pi's extension
   API can also remove tools and replace compaction, so no fork is needed.
 - **0.4** Git pre-commit hook and a GitHub Action.

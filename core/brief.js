@@ -118,6 +118,12 @@ export function checkGate(intent, md) {
   return problems;
 }
 
+/** The planned steps as written, and how many are ticked. @param {string} md */
+export function steps(md) {
+  const all = bullets(sections(md)['steps']).filter((b) => /^[-*]\s+\[[ xX]\]/.test(b));
+  return { text: all.join('\n'), planned: all.length, done: all.filter((b) => /^[-*]\s+\[[xX]\]/.test(b)).length };
+}
+
 /** @param {string} md */
 export function currentStep(md) {
   for (const b of bullets(sections(md)['steps'])) {

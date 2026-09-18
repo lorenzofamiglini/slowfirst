@@ -44,6 +44,7 @@ export function handle(input, root, now) {
       return context(engine.sessionContext(root));
 
     case 'BeforeAgent': {
+      engine.noteTurn(root, String(input.prompt ?? ''), env);
       const result = engine.handleUserInput(root, String(input.prompt ?? ''), env);
       if (result && !result.context) return { decision: 'deny', reason: result.message };
       const out = context([result?.context, engine.turnContext(root)].filter(Boolean).join('\n\n')) ?? {};
@@ -58,9 +59,12 @@ export function handle(input, root, now) {
       return null;
     }
 
-    case 'AfterTool':
-      if (!SHELL_TOOLS.has(input.tool_name)) return null;
-      return context(engine.afterShell(root, shellId(input), env) ?? '');
+    case 'AfterTool': {
+      if (SHELL_TOOLS.has(input.tool_name)) return context(engine.afterShell(root, shellId(input), env) ?? '');
+      const call = toToolCall(input, root);
+      if (call.kind === 'edit') for (const file of call.paths) engine.afterEdit(root, file, env);
+      return null;
+    }
   }
   return null;
 }

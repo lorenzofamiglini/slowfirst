@@ -4,6 +4,8 @@
 
 import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
+import { readFileSync, statSync } from 'node:fs';
+import path from 'node:path';
 
 const SCOPE = ['--', '.', ':(exclude).slowfirst'];
 
@@ -40,6 +42,36 @@ export function snapshot(root) {
   } catch {
     return null;
   }
+}
+
+/**
+ * Size of the current change against HEAD, untracked files included.
+ * @param {string} root
+ * @returns {{ files: number, added: number, removed: number }}
+ */
+export function diffStat(root) {
+  const stat = { files: 0, added: 0, removed: 0 };
+  try {
+    for (const line of git(root, ['diff', '--numstat', 'HEAD', ...SCOPE]).split('\n').filter(Boolean)) {
+      const [added, removed] = line.split('\t');
+      stat.files++;
+      stat.added += Number(added) || 0; // "-" for binary files
+      stat.removed += Number(removed) || 0;
+    }
+    for (const line of git(root, ['status', '--porcelain=v1', '-uall', ...SCOPE]).split('\n')) {
+      if (!line.startsWith('??')) continue;
+      stat.files++;
+      try {
+        const file = path.join(root, line.slice(3));
+        if (statSync(file).size <= 1_000_000) stat.added += readFileSync(file, 'utf8').split('\n').length;
+      } catch {
+        // unreadable or vanished; it still counts as a changed file
+      }
+    }
+  } catch {
+    // not a git repo, or no commits yet
+  }
+  return stat;
 }
 
 /**

@@ -3,6 +3,9 @@ import os from 'node:os';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
 
+// Never let a test write to the developer's real personal memory.
+process.env.SLOWFIRST_HOME ??= fs.mkdtempSync(path.join(os.tmpdir(), 'slowfirst-home-'));
+
 /** A throwaway git repo with one committed file, src/app.js. */
 export function makeRepo() {
   const root = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), 'slowfirst-')));

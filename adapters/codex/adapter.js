@@ -49,6 +49,7 @@ export function handle(input, root, now) {
   if (event === 'SessionStart') return context(engine.sessionContext(root));
 
   if (event === 'UserPromptSubmit') {
+    engine.noteTurn(root, String(input.prompt ?? ''), env);
     const result = engine.handleUserInput(root, String(input.prompt ?? ''), env);
     if (result && !result.context) return { decision: 'block', reason: result.message };
     return context([result?.context, engine.turnContext(root)].filter(Boolean).join('\n\n'));
@@ -64,8 +65,11 @@ export function handle(input, root, now) {
     return null;
   }
 
-  if (event === 'PostToolUse' && SHELL_TOOLS.has(input.tool_name)) {
-    return context(engine.afterShell(root, String(input.tool_use_id ?? ''), env) ?? '');
+  if (event === 'PostToolUse') {
+    if (SHELL_TOOLS.has(input.tool_name)) return context(engine.afterShell(root, String(input.tool_use_id ?? ''), env) ?? '');
+    const call = toToolCall(input, root);
+    if (call.kind === 'edit') for (const file of call.paths) engine.afterEdit(root, file, env);
+    return null;
   }
 
   return null;

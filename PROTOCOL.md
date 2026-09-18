@@ -106,6 +106,26 @@ How to read it:
 - Many overrides of one rule, across people: the rule is bad. Fix the rule.
 - Many overrides of every rule, in one project or by one person: that is drift.
 
+## Signals and memory
+
+The invariants are enforced at gates. Between gates, drift shows in numbers, so the
+harness records them and, later, learns from them.
+
+- **Signals** are measured from what the harness already sees: files touched that no
+  step mentions, size against the estimate, new dependencies and new surface area,
+  attempts without a confirmed cause, time since the last passing check, and how much
+  the human is still engaging.
+- **An episode** is one task, from intent to close. The human labels it in one word at
+  the end, and objective outcomes (reverted, abandoned, overridden) are added to it.
+- **Memory is personal and local.** Thresholds come from the human's own past tasks,
+  not from global numbers, and hold numbers only: never prompts, never code.
+- **Escalation is graded:** a nudge, then a checkpoint that asks the human to restate
+  how the work serves the intent, and only then a stop. Every alert records whether the
+  human accepted or dismissed it, which measures its precision.
+- **A rule changes only after a backtest.** Past logs are replayed to ask whether the
+  change catches held-out bad episodes, how early, and whether it stays quiet on good
+  ones and on the controls.
+
 ## Evaluation: staying general
 
 Rules come from general failure modes, never from a single incident. No rule may exist

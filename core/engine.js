@@ -10,8 +10,9 @@ import { createHash } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import * as store from './store.js';
 import * as brief from './brief.js';
-import { snapshot, changedSince } from './git.js';
-import { computeStats, formatStats } from './stats.js';
+import * as memory from './memory.js';
+import { snapshot, changedSince, diffStat } from './git.js';
+import { computeStats, formatStats, taskSignals } from './stats.js';
 
 /**
  * @typedef {{ kind: 'edit', paths: string[] } | { kind: 'shell', command: string } | { kind: 'other', name: string }} ToolCall
@@ -128,21 +129,44 @@ export function handleUserInput(root, text, env = {}) {
 
     case 'done': {
       if (!state.intent) return { message: 'No active task to close.' };
+      const label = arg.toLowerCase();
+      if (!(label in memory.LABELS)) {
+        return {
+          message: [
+            'How did this task go? Close it with one word:',
+            ...Object.entries(memory.LABELS).map(([key, meaning]) => `  sf done ${key.padEnd(6)} ${meaning}`),
+            `The label goes to your personal memory in ${memory.home()}, as numbers only: never your prompts or your code.`,
+          ].join('\n'),
+        };
+      }
       const p = store.paths(root);
       fs.mkdirSync(p.archive, { recursive: true });
       const slug = state.intent.toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 40).replace(/^-|-$/g, '');
       const file = path.join(p.archive, `${(env.now ?? new Date()).toISOString().slice(0, 10)}-${slug || 'task'}.md`);
       fs.writeFileSync(file, state.md);
-      log(root, { type: 'done', archive: path.relative(root, file) }, env);
+      const signals = taskSignals(state.events, state.md, diffStat(root), env.now);
+      memory.remember({
+        t: (env.now ?? new Date()).toISOString(),
+        repo: path.basename(root),
+        label: /** @type {keyof typeof memory.LABELS} */ (label),
+        signals,
+      });
+      log(root, { type: 'done', label, archive: path.relative(root, file), signals }, env);
       store.writeBrief(root, brief.template(null));
-      return { message: `Task closed. Brief archived to ${path.relative(root, file)}. Back to SLOW for the next task.` };
+      return {
+        message: [
+          `Task closed as "${label}". Brief archived to ${path.relative(root, file)}.`,
+          `${signals.minutes} min, ${signals.turns} turns, ${signals.filesTouched} files, +${signals.added}/-${signals.removed} lines.`,
+          'Back to SLOW for the next task.',
+        ].join('\n'),
+      };
     }
 
     case 'status':
       return { message: status(state) };
 
     case 'stats':
-      return { message: formatStats(computeStats(state.events, env.now)) };
+      return { message: formatStats(computeStats(state.events, env.now), memory.episodes()) };
   }
   return null;
 }
@@ -321,6 +345,28 @@ function restoreState(root, guard, env) {
   fs.writeFileSync(p.log, guard.log + kept);
   log(root, { type: 'state_restored' }, env);
   return true;
+}
+
+/**
+ * Record that the human took a turn. Length only: the text itself is never stored.
+ * @param {string} root @param {string} text @param {Env} [env]
+ */
+export function noteTurn(root, text, env = {}) {
+  if (!store.isActive(root)) return;
+  log(root, { type: 'turn', chars: text.length, words: text.trim().split(/\s+/).filter(Boolean).length }, env);
+}
+
+/**
+ * Record an edit that went through, with how big the change is so far. These numbers
+ * are what later versions compare against your past tasks.
+ * @param {string} root @param {string} file @param {Env} [env]
+ */
+export function afterEdit(root, file, env = {}) {
+  if (!store.isActive(root)) return;
+  const rel = path.relative(real(root), real(path.resolve(root, file))).split(path.sep).join('/');
+  if (rel.startsWith('../') || rel.startsWith('.slowfirst/')) return;
+  const stat = diffStat(root);
+  log(root, { type: 'edit', file: rel, files: stat.files, added: stat.added, removed: stat.removed }, env);
 }
 
 /** @param {string} text @param {number} max */

@@ -14,7 +14,7 @@
     ],
     "PostToolUse": [
       {
-        "matcher": "Bash|PowerShell",
+        "matcher": "Edit|Write|MultiEdit|NotebookEdit|Bash|PowerShell",
         "hooks": [{ "type": "command", "command": "node \"${CLAUDE_PLUGIN_ROOT}/adapters/claude-code/hook.js\"" }]
       }
     ]
