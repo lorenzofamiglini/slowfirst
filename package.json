@@ -1,0 +1,29 @@
+{
+  "name": "slowfirst",
+  "version": "0.1.0",
+  "description": "Keep the human's understanding ahead of the code: a slow phase (understand, no code) before a fast phase (small verified steps) for AI coding agents.",
+  "type": "module",
+  "bin": {
+    "slowfirst": "bin/slowfirst.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "test": "node --test"
+  },
+  "keywords": [
+    "ai",
+    "coding-agent",
+    "claude-code",
+    "pi",
+    "agent-harness",
+    "developer-experience"
+  ],
+  "author": "Lorenzo Famiglini",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lorenzofamiglini/slowfirst.git"
+  }
+}

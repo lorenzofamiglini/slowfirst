@@ -1,0 +1,13 @@
+{
+  "name": "slowfirst",
+  "version": "0.1.0",
+  "description": "Keep the human's understanding ahead of the code: code edits stay locked until the human has stated the intent, checked the beliefs and explained the code, then work goes in small verified steps.",
+  "author": {
+    "name": "Lorenzo Famiglini",
+    "url": "https://github.com/lorenzofamiglini"
+  },
+  "repository": "https://github.com/lorenzofamiglini/slowfirst",
+  "license": "MIT",
+  "keywords": ["workflow", "understanding", "scope", "pair-programming"],
+  "hooks": "./adapters/claude-code/hooks.json"
+}

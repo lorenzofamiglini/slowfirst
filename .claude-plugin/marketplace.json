@@ -1,0 +1,15 @@
+{
+  "name": "slowfirst",
+  "description": "slowfirst: understanding before code, for AI coding agents.",
+  "owner": {
+    "name": "Lorenzo Famiglini",
+    "url": "https://github.com/lorenzofamiglini"
+  },
+  "plugins": [
+    {
+      "name": "slowfirst",
+      "source": "./",
+      "description": "Understanding before code: a SLOW phase with edits locked, then small verified steps."
+    }
+  ]
+}
