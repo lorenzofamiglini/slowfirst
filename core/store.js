@@ -70,10 +70,10 @@ export function append(root, event, now = new Date()) {
 
 /**
  * @param {Event[]} events
- * @returns {{ phase: 'slow' | 'fast', intent: string | null, since: string | null }}
+ * @returns {{ phase: 'slow' | 'fast' | 'trivial', intent: string | null, since: string | null }}
  */
 export function currentState(events) {
-  /** @type {'slow' | 'fast'} */
+  /** @type {'slow' | 'fast' | 'trivial'} */
   let phase = 'slow';
   /** @type {string | null} */
   let intent = null;

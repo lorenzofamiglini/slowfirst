@@ -62,8 +62,8 @@ export function handle(input, root, now) {
     case 'AfterTool': {
       if (SHELL_TOOLS.has(input.tool_name)) return context(engine.afterShell(root, shellId(input), env) ?? '');
       const call = toToolCall(input, root);
-      if (call.kind === 'edit') for (const file of call.paths) engine.afterEdit(root, file, env);
-      return null;
+      if (call.kind !== 'edit') return null;
+      return context(call.paths.map((file) => engine.afterEdit(root, file, env)).filter(Boolean).join('\n'));
     }
   }
   return null;

@@ -210,6 +210,61 @@ test('shell commands are not tracked during FAST', () => {
   assert.equal(engine.afterShell(root, 'call-1'), null);
 });
 
+/** @param {string} root @param {number} lines */
+function write(root, file, lines) {
+  fs.writeFileSync(path.join(root, 'src', file), Array.from({ length: lines }, (_, i) => `const l${i} = ${i};`).join('\n'));
+  return engine.afterEdit(root, path.join(root, 'src', file));
+}
+
+test('the gate asks for an estimate once there are steps', () => {
+  const root = readyRepo();
+  writeBrief(root, completeBrief('x').replace('Estimate: 40 lines\n', ''));
+  assert.match(sf(root, 'sf fast').message, /No estimate/);
+  assert.equal(phase(root), 'slow');
+});
+
+test('the trivial lane needs no brief, and going over it returns to SLOW', () => {
+  const root = makeRepo();
+  sf(root, 'sf init');
+  const opened = sf(root, 'sf trivial fix a typo in the log message');
+  assert.match(opened.message, /Trivial lane/);
+  assert.deepEqual(edit(root, 'src/app.js'), { allow: true });
+  assert.equal(write(root, 'app.js', 5), null, 'a small change stays in the lane');
+  const note = write(root, 'app.js', 40);
+  assert.match(note, /past the trivial lane/);
+  assert.equal(phase(root), 'slow');
+  assert.equal(edit(root, 'src/app.js').allow, false);
+});
+
+test('a step that runs long gets one warning, not a stream of them', () => {
+  const root = readyRepo();
+  writeBrief(root, completeBrief('x').replace('(verify: node', '(budget: 5) (verify: node'));
+  sf(root, 'sf fast');
+  assert.equal(write(root, 'app.js', 3), null);
+  assert.match(write(root, 'app.js', 30), /past its budget of 5/);
+  assert.equal(write(root, 'app.js', 40), null, 'already warned about this step');
+  assert.equal(phase(root), 'fast', 'a long step is a warning, not a stop');
+});
+
+test('ticking a step starts the next step with a fresh budget', () => {
+  const root = readyRepo();
+  writeBrief(root, completeBrief('x').replace('(verify: node', '(budget: 5) (verify: node'));
+  sf(root, 'sf fast');
+  write(root, 'app.js', 30); // warns
+  writeBrief(root, completeBrief('x').replace('- [ ] change x to 2', '- [x] change x to 2'));
+  assert.equal(write(root, 'app.js', 32), null, 'the tick resets the count');
+  assert.ok(readLog(root).some((e) => e.type === 'step_done' && e.n === 1));
+});
+
+test('work past twice the estimate stops and returns to SLOW', () => {
+  const root = readyRepo();
+  sf(root, 'sf fast'); // the brief estimates 40 lines
+  const note = write(root, 'app.js', 120);
+  assert.match(note, /against an estimate of 40/);
+  assert.equal(phase(root), 'slow');
+  assert.ok(readLog(root).some((e) => e.type === 'budget' && e.lane === 'task'));
+});
+
 test('done asks for one word about how the task went', () => {
   const root = readyRepo();
   sf(root, 'sf fast');

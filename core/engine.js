@@ -23,7 +23,9 @@ import { computeStats, formatStats, taskSignals } from './stats.js';
  * @typedef {{ now?: Date, harness?: string }} Env
  */
 
-const COMMAND = /^\s*sf\s+(init|intent|fast|slow|override|done|status|stats)(?:\s+([\s\S]*?))?\s*$/i;
+const COMMAND = /^\s*sf\s+(init|intent|fast|trivial|slow|override|done|status|stats)(?:\s+([\s\S]*?))?\s*$/i;
+const STEP_BUDGET = 200; // lines in one step before slowfirst says something
+const TRIVIAL = { files: 1, lines: 20 };
 // These two patterns only give the model a clear early answer for the obvious
 // spellings. The real guards are afterShell (which undoes any change to the log made
 // by a shell command) and the CLI's refusal to change the phase without a terminal.
@@ -46,6 +48,18 @@ function load(root) {
 }
 
 /**
+ * Lines changed so far, counted forward so a commit in the middle doesn't reset it.
+ * @param {import('./store.js').Event[]} events
+ */
+const linesSoFar = (events) => [...events].reverse().find((e) => e.type === 'edit')?.cum ?? 0;
+
+/**
+ * Lines counted at the last event of one of these types: the baseline a budget measures from.
+ * @param {import('./store.js').Event[]} events @param {string[]} types
+ */
+const linesAt = (events, types) => [...events].reverse().find((e) => types.includes(e.type))?.cum ?? 0;
+
+/**
  * Handle text typed by the human. Only this path can change the phase, so the
  * model can't unlock itself: adapters must call it with human input only.
  * @param {string} root
@@ -66,10 +80,10 @@ export function handleUserInput(root, text, env = {}) {
   switch (command) {
     case 'intent': {
       if (!arg) return { message: `Write the intent after the command: ${INTENT_HINT}` };
-      log(root, { type: 'intent', text: arg }, env);
+      log(root, { type: 'intent', text: arg, cum: linesSoFar(state.events) }, env);
       store.writeBrief(root, brief.withIntent(state.md, arg));
       if (state.phase === 'fast') {
-        log(root, { type: 'phase', to: 'slow', via: 'intent' }, env);
+        log(root, { type: 'phase', to: 'slow', via: 'intent', cum: linesSoFar(state.events) }, env);
         return {
           message: 'Intent changed. Back to SLOW: the plan was built on the old intent.',
           context: '[slowfirst] The human changed the intent, so the session is back in SLOW. Work out with them which beliefs and steps in the brief still hold.',
@@ -94,7 +108,7 @@ export function handleUserInput(root, text, env = {}) {
           ].join('\n'),
         };
       }
-      log(root, { type: 'phase', to: 'fast', via: 'gate' }, env);
+      log(root, { type: 'phase', to: 'fast', via: 'gate', cum: linesSoFar(state.events) }, env);
       return {
         message: `Gate passed. FAST. Current step: ${brief.currentStep(state.md) ?? '(none open)'}`,
         context: '[slowfirst] The human passed the gate. Start on the first open step in the brief.',
@@ -110,7 +124,7 @@ export function handleUserInput(root, text, env = {}) {
       if (state.phase === 'fast') return { message: 'Already in FAST, so there is nothing to override.' };
       const skipped = brief.checkGate(state.intent, state.md).map((p) => p.label);
       log(root, { type: 'override', gate: 'fast', reason: arg, skipped }, env);
-      log(root, { type: 'phase', to: 'fast', via: 'override' }, env);
+      log(root, { type: 'phase', to: 'fast', via: 'override', cum: linesSoFar(state.events) }, env);
       const unknown = skipped.length ? ` The gate had not checked: ${skipped.join(', ')}, so treat those as unknown and keep changes small.` : '';
       return {
         message: `Override logged ("${arg}"). FAST.`,
@@ -118,9 +132,18 @@ export function handleUserInput(root, text, env = {}) {
       };
     }
 
+    case 'trivial': {
+      if (state.phase === 'trivial') return { message: 'Already in the trivial lane.' };
+      log(root, { type: 'phase', to: 'trivial', via: 'human', cum: linesSoFar(state.events), ...(arg && { reason: arg }) }, env);
+      return {
+        message: `Trivial lane: ${TRIVIAL.files} file, ${TRIVIAL.lines} lines, no gate. Going over sends you back to SLOW.`,
+        context: `[slowfirst] The human opened the trivial lane${arg ? ` for: ${arg}` : ''}: one file, at most ${TRIVIAL.lines} lines, no brief. Do exactly that and nothing more. If it turns out to need more, stop and say so.`,
+      };
+    }
+
     case 'slow': {
       if (state.phase === 'slow') return { message: 'Already in SLOW.' };
-      log(root, { type: 'phase', to: 'slow', via: 'human', ...(arg && { reason: arg }) }, env);
+      log(root, { type: 'phase', to: 'slow', via: 'human', cum: linesSoFar(state.events), ...(arg && { reason: arg }) }, env);
       return {
         message: 'Back to SLOW. Code edits are locked.',
         context: `[slowfirst] The human went back to SLOW${arg ? ` (reason: ${arg})` : ''}. Stop building. Work out with them what was wrong in the picture or the plan, and update the brief.`,
@@ -188,6 +211,10 @@ function init(root, env) {
 /** @param {ReturnType<typeof load>} state */
 function status(state) {
   const lines = [`slowfirst: ${state.phase.toUpperCase()}${state.since ? ` since ${state.since.slice(0, 16).replace('T', ' ')}` : ''}`];
+  if (state.phase === 'trivial') {
+    lines.push(`At most ${TRIVIAL.files} file and ${TRIVIAL.lines} lines. Type \`sf slow\` to leave the lane.`);
+    return lines.join('\n');
+  }
   lines.push(`Intent: ${state.intent ?? '(not set)'}`);
   if (state.phase === 'slow') {
     const problems = brief.checkGate(state.intent, state.md);
@@ -362,11 +389,71 @@ export function noteTurn(root, text, env = {}) {
  * @param {string} root @param {string} file @param {Env} [env]
  */
 export function afterEdit(root, file, env = {}) {
-  if (!store.isActive(root)) return;
+  if (!store.isActive(root)) return null;
   const rel = path.relative(real(root), real(path.resolve(root, file))).split(path.sep).join('/');
-  if (rel.startsWith('../') || rel.startsWith('.slowfirst/')) return;
+  if (rel.startsWith('../') || rel.startsWith('.slowfirst/')) return null;
+
+  const before = load(root);
   const stat = diffStat(root);
-  log(root, { type: 'edit', file: rel, files: stat.files, added: stat.added, removed: stat.removed }, env);
+  const lines = stat.added + stat.removed;
+  const last = [...before.events].reverse().find((e) => e.type === 'edit');
+  // Counted forward: a commit resets the diff, so only growth is added.
+  const cum = (last?.cum ?? 0) + Math.max(0, lines - ((last?.added ?? 0) + (last?.removed ?? 0)));
+  log(root, { type: 'edit', file: rel, files: stat.files, added: stat.added, removed: stat.removed, cum }, env);
+
+  const events = store.readLog(root);
+  if (before.phase === 'trivial') return checkTrivial(root, stat, cum, events, env);
+  if (before.phase === 'fast') return checkBudget(root, before.md, cum, events, env);
+  return null;
+}
+
+/** @param {string} root @param {{files: number}} stat @param {number} cum @param {import('./store.js').Event[]} events @param {Env} env */
+function checkTrivial(root, stat, cum, events, env) {
+  const changed = cum - linesAt(events, ['phase']);
+  if (stat.files <= TRIVIAL.files && changed <= TRIVIAL.lines) return null;
+  log(root, { type: 'budget', lane: 'trivial', files: stat.files, lines: changed }, env);
+  log(root, { type: 'phase', to: 'slow', via: 'budget', cum }, env);
+  return (
+    `[slowfirst] This is past the trivial lane (${stat.files} files, ${changed} lines changed; the lane allows ${TRIVIAL.files} file and ${TRIVIAL.lines} lines). ` +
+    'Back to SLOW. Tell the human it turned out bigger than it looked, and help them write the intent.'
+  );
+}
+
+/**
+ * Warn when a step runs long; stop when the task passes twice the human's estimate.
+ * @param {string} root @param {string} md @param {number} cum @param {import('./store.js').Event[]} events @param {Env} env
+ */
+function checkBudget(root, md, cum, events, env) {
+  // A newly ticked step resets the step budget.
+  const ticked = brief.steps(md).done;
+  const lastStep = [...events].reverse().find((e) => e.type === 'step_done');
+  if (ticked > (lastStep?.n ?? 0)) {
+    log(root, { type: 'step_done', n: ticked, cum }, env);
+    return null;
+  }
+
+  const estimate = brief.estimate(md);
+  const task = cum - linesAt(events, ['intent']);
+  if (estimate && task > estimate * 2) {
+    log(root, { type: 'budget', lane: 'task', lines: task, estimate }, env);
+    log(root, { type: 'phase', to: 'slow', via: 'budget', cum }, env);
+    return (
+      `[slowfirst] This task has changed ${task} lines against an estimate of ${estimate}. Past twice the estimate, slowfirst goes back to SLOW. ` +
+      'Stop here. Tell the human what turned out bigger than expected, and update the brief with them before going on.'
+    );
+  }
+
+  const budget = brief.stepBudget(md, STEP_BUDGET);
+  const step = cum - linesAt(events, ['phase', 'step_done']);
+  const warned = [...events].reverse().find((e) => e.type === 'budget' || e.type === 'phase' || e.type === 'step_done');
+  if (step > budget && warned?.type !== 'budget') {
+    log(root, { type: 'budget', lane: 'step', lines: step, budget }, env);
+    return (
+      `[slowfirst] This step has changed ${step} lines, past its budget of ${budget}. ` +
+      'Either finish and tick it so the human can review, or split it. A step the human cannot read is a step they cannot check.'
+    );
+  }
+  return null;
 }
 
 /** @param {string} text @param {number} max */
@@ -380,6 +467,12 @@ const clip = (text, max) => (text.length > max ? `${text.slice(0, max)}…` : te
 export function turnContext(root) {
   if (!store.isActive(root)) return '';
   const state = load(root);
+  if (state.phase === 'trivial') {
+    return [
+      `[slowfirst] Trivial lane: at most ${TRIVIAL.files} file and ${TRIVIAL.lines} lines, no brief.`,
+      'Do exactly what the human asked and nothing else. If it needs more than that, stop and say so; going over sends the session back to SLOW.',
+    ].join('\n');
+  }
   if (state.phase === 'slow' && !state.intent) {
     return [
       '[slowfirst] Phase SLOW. No intent yet.',

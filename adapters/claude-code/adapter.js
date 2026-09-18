@@ -63,8 +63,9 @@ export function handle(input, root, now) {
       return note ? { decision: 'block', reason: note } : null;
     }
     const call = toToolCall(input.tool_name, input.tool_input);
-    if (call.kind === 'edit') for (const file of call.paths) engine.afterEdit(root, file, env);
-    return null;
+    if (call.kind !== 'edit') return null;
+    const notes = call.paths.map((file) => engine.afterEdit(root, file, env)).filter(Boolean);
+    return notes.length ? { decision: 'block', reason: notes.join('\n') } : null;
   }
 
   return null;

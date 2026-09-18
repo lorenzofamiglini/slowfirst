@@ -33,7 +33,8 @@ ${intent}
 Q: what does src/app.js export? A: x = 1. Correct.
 
 ## Steps
-- [ ] change x to 2 (verify: node -e "import('./src/app.js')")
+Estimate: 40 lines
+- [ ] change x to 2 in src/app.js (verify: node -e "import('./src/app.js')")
 - [ ] update the caller
 `;
 

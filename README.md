@@ -1,20 +1,42 @@
 # slowfirst
 
-AI makes writing code nearly free. What's scarce is your understanding of the problem
-and of the system. When code gets ahead of that understanding, work drifts: days spent
-on a bug that isn't there, a small tool that grows into a platform, a rewrite nobody can
-explain.
+**Understanding before code, enforced by your AI coding tool.**
 
-slowfirst keeps your understanding ahead of the code.
+Five days hunting a bug that was never in the code. A local script that quietly became a
+production system. A ten-thousand-line rewrite of a library that already did the job,
+which nobody on the team can explain.
 
-- **SLOW.** Code edits are locked. You state the intent in your own words. The AI
-  helps you check the beliefs the plan rests on, and quizzes you on the real code
-  you're about to change.
-- **FAST.** Once that's done, work goes in small steps, each one verified before the
-  next.
+None of these start with a bad decision. They start with a plausible first step, and an
+AI that can produce ten more before anyone asks whether the first one was right.
 
-The rules are in [PROTOCOL.md](PROTOCOL.md). This repo is the reference implementation,
-starting with a Claude Code plugin.
+Writing code is now the cheap part. **Understanding is the scarce part**, and drift is
+what happens when code gets ahead of it. slowfirst puts that back in order:
+
+```
+   SLOW                                    FAST
+   code edits locked                       edits unlocked, one step at a time
+   ────────────────────────────────►│────────────────────────────────────►
+   your intent, in your words       │      small steps, each verified
+   beliefs checked against reality  │      anything off-intent is refused
+   the AI quizzes you on the code   │      past 2x your estimate → back to SLOW
+                                  gate
+```
+
+- **Nothing is generated until you can say what the problem is**, in your own words.
+- **"The bug is in the code" is a belief, not a fact.** It has to be checked, cheapest
+  check first, before anything is built on it.
+- **The AI asks you to explain the code it's about to change**, and tells you where
+  you're wrong. Reading a summary is not understanding.
+- **Then it moves fast**, in steps small enough for you to read.
+- **Every gate can be overridden**, and every override is logged. Friction you can't
+  skip is friction people uninstall.
+
+Not a linter, not a prompt, not a checklist. Your AI tool physically cannot edit the
+code until the gate opens.
+
+The rules are in [PROTOCOL.md](PROTOCOL.md), written to hold in any tool. This repo is
+the reference implementation: a Claude Code plugin, plus adapters for Codex CLI and
+Gemini CLI.
 
 ## Install (Claude Code)
 
@@ -39,6 +61,12 @@ They haven't been run against the live CLIs yet, so please report what breaks.
    - **Gemini CLI:** the `hooks` block in
      [`adapters/gemini/settings.json`](adapters/gemini/settings.json) goes in your
      Gemini `settings.json`.
+
+## In a hurry?
+
+`sf trivial fix the typo` gives you one file and 20 lines with no gate. `sf override
+<reason>` skips the gate entirely. Both are logged, so you can see later which gates
+keep getting in the way. A gate that everyone skips is a bad gate.
 
 ## A session
 
@@ -69,6 +97,7 @@ You type these in the prompt. The AI can't run them, so it can't unlock itself.
 | `sf init` | Turn slowfirst on in this repo |
 | `sf intent <text>` | The problem, who uses the result and for what, and how you'll know it's done |
 | `sf fast` | Check the brief. If it's complete, unlock code edits; if not, list what's missing |
+| `sf trivial [reason]` | One file, 20 lines, no gate. Going over returns you to SLOW |
 | `sf slow [reason]` | Go back to understanding |
 | `sf override <reason>` | Skip the gate. The reason is logged |
 | `sf done` | Close the task, archive the brief, and start the next task in SLOW |
@@ -87,7 +116,14 @@ the lock only run in an interactive terminal.
 - every belief is tagged, none is still `[assumed]`, and each `[observed]` or `[refuted]`
   belief has evidence (a command and its output, or `file:line`);
 - there is a teach-back;
-- there is at least one step.
+- there is at least one step, and an estimate for the whole task.
+
+While you work, two budgets run off that estimate:
+
+- **Per step:** past 200 lines, slowfirst says so once. Finish the step and tick it so
+  it can be reviewed, or split it. A step can ask for more with `(budget: 400)`.
+- **For the task:** past twice your estimate, work stops and returns to SLOW. Being that
+  far out means the plan was wrong, not that you need more lines.
 
 ## What's enforced, and what isn't
 
@@ -97,6 +133,8 @@ exactly what the Claude Code plugin does:
 
 - **Blocked before it runs:** the AI's edit tools (Edit, Write, NotebookEdit) on files
   in the repo during SLOW, and on `.slowfirst/log.jsonl` at any time.
+- **Stopped as it happens:** work past twice your estimate, or past the trivial lane.
+  The session returns to SLOW and the AI is told why.
 - **Undone after it runs:** a shell command that changes slowfirst's own state. That
   covers forging a phase change in the log, rewriting the log, or deleting
   `.slowfirst/`. The previous state is restored, the AI is told, and the event is
@@ -207,13 +245,14 @@ Each adapter is about 70 lines. See [adapters/](adapters/).
 
 ## Roadmap
 
-- **0.2** Signals and personal memory (done: recording only). Next: step budgets, per
-  step and total against your estimate, and the trivial lane.
-- **0.2.x** A replay tool, so any rule can be backtested on past logs. Then nudges from
-  the signals, measured by whether you accept or dismiss them, and only then stops.
-- **0.3** Codex CLI and Gemini CLI adapters run live, and a pi adapter. pi's extension
-  API can also remove tools and replace compaction, so no fork is needed.
-- **0.4** Git pre-commit hook and a GitHub Action.
+- **0.2** Done: signals and personal memory (recording only), step and task budgets, and
+  the trivial lane.
+- **0.3** A replay tool, so any rule can be backtested on past logs. Then nudges driven
+  by the signals, measured by whether you accept or dismiss them, and only then stops.
+- **0.4** The Codex CLI and Gemini CLI adapters run against the live tools, plus a pi
+  adapter. pi's extension API can also remove tools and replace compaction, so no fork
+  is needed.
+- **0.5** Git pre-commit hook and a GitHub Action, the layer no tool switch can dodge.
 - **Evaluation.** A held-out set of incidents and a set of control tasks that must not
   be slowed; see [PROTOCOL.md](PROTOCOL.md#evaluation-staying-general).
 

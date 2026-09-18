@@ -63,8 +63,10 @@ The protocol has one aim: **keep the human's understanding ahead of the code.**
 - The human asks to go FAST. The harness checks the brief is complete and opens the
   gate, or says what is missing.
 
+A step over its budget is a warning, not a stop: the human is asked to finish and review
+it, or split it. Stops are reserved for evidence that the plan itself was wrong.
+
 **FAST**: one step at a time. Work returns to SLOW when:
-- a step exceeds its budget;
 - the total exceeds 2x the estimate;
 - a belief is falsified;
 - N attempts in a row fail;

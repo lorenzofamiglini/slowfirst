@@ -23,7 +23,10 @@ ${intent ?? NO_INTENT}
 Record the questions, the human's answers, and where they were wrong. -->
 
 ## Steps
-<!-- Small steps, each verified before the next starts:
+<!-- Small steps, each verified before the next starts. Estimate the whole task first;
+work that runs past twice the estimate goes back to SLOW. A step that needs more than
+200 lines can say so with (budget: 400).
+Estimate: <n> lines
 - [ ] <step> (verify: how) -->
 `;
 }
@@ -113,6 +116,11 @@ export function checkGate(intent, md) {
 
   if (!bullets(s['steps']).some((b) => /^[-*]\s+\[[ xX]\]/.test(b))) {
     problems.push({ label: 'steps', detail: 'No steps planned. Write them as `- [ ] <step> (verify: how)`.' });
+  } else if (estimate(md) === null) {
+    problems.push({
+      label: 'estimate',
+      detail: 'No estimate. Add `Estimate: <n> lines` for the whole task; work past twice that goes back to SLOW.',
+    });
   }
 
   return problems;
@@ -122,6 +130,18 @@ export function checkGate(intent, md) {
 export function steps(md) {
   const all = bullets(sections(md)['steps']).filter((b) => /^[-*]\s+\[[ xX]\]/.test(b));
   return { text: all.join('\n'), planned: all.length, done: all.filter((b) => /^[-*]\s+\[[xX]\]/.test(b)).length };
+}
+
+/** The human's estimate for the whole task, in lines. @param {string} md */
+export function estimate(md) {
+  const match = (sections(md)['steps'] ?? []).join('\n').match(/estimate:\s*~?(\d+)/i);
+  return match ? Number(match[1]) : null;
+}
+
+/** The current step's own budget in lines, if it names one. @param {string} md @param {number} fallback */
+export function stepBudget(md, fallback) {
+  const match = (currentStep(md) ?? '').match(/\(budget:\s*(\d+)\s*(?:lines)?\)/i);
+  return match ? Number(match[1]) : fallback;
 }
 
 /** @param {string} md */
