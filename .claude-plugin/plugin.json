@@ -1,6 +1,6 @@
 {
   "name": "slowfirst",
-  "version": "0.2.2",
+  "version": "0.3.0",
   "description": "Keep the human's understanding ahead of the code: code edits stay locked until the human has stated the intent, checked the beliefs and explained the code, then work goes in small verified steps.",
   "author": {
     "name": "Lorenzo Famiglini",
