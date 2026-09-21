@@ -1,6 +1,6 @@
 {
   "name": "slowfirst",
-  "version": "0.2.0",
+  "version": "0.2.2",
   "description": "Keep the human's understanding ahead of the code: a slow phase (understand, no code) before a fast phase (small verified steps) for AI coding agents.",
   "type": "module",
   "bin": {
@@ -10,7 +10,8 @@
     "node": ">=18"
   },
   "scripts": {
-    "test": "node --test"
+    "test": "node --test",
+    "prepublishOnly": "node --test"
   },
   "keywords": [
     "ai",
@@ -27,5 +28,18 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/lorenzofamiglini/slowfirst.git"
+  },
+  "files": [
+    "core",
+    "adapters",
+    "bin",
+    "skills",
+    ".claude-plugin",
+    "PROTOCOL.md",
+    "CONTRIBUTING.md"
+  ],
+  "homepage": "https://github.com/lorenzofamiglini/slowfirst#readme",
+  "bugs": {
+    "url": "https://github.com/lorenzofamiglini/slowfirst/issues"
   }
 }
