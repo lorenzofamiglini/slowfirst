@@ -1,0 +1,75 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1200" role="img" aria-label="Code edits stay locked in SLOW until the brief passes the gate; FAST then runs in verified steps, and overrunning the estimate or hitting a surprise sends you back to SLOW. An override can skip the gate, and is logged.">
+  <rect width="1200" height="1200" fill="#ffffff"/>
+  <text x="80" y="150" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="30" fill="#2a78d6">slowfirst</text>
+  <text font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="64" font-weight="700" fill="#0b0b0b">
+    <tspan x="80" y="250">Pair programming with an AI</tspan>
+    <tspan x="80" y="330">that won't let you skip</tspan>
+    <tspan x="80" y="410">the understanding.</tspan>
+  </text>
+  <svg x="40" y="500" width="1120" height="392" viewBox="0 0 960 336"><defs>
+    <marker id="ink" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="#52514e"/></marker>
+    <marker id="back" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="#d03b3b"/></marker>
+  </defs>
+
+  <!-- override: the one sanctioned way round the gate -->
+  <path d="M260 90 V44 H760 V88" fill="none" stroke="#52514e" stroke-width="1.5" stroke-dasharray="5 5" marker-end="url(#ink)"/>
+  <text x="510" y="34" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12" font-weight="400" fill="#0b0b0b" text-anchor="end">sf override</text>
+  <text x="518" y="34" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="12" font-weight="400" fill="#52514e" text-anchor="start">skips the gate, and is logged</text>
+
+  <!-- SLOW -->
+  <rect x="20" y="90" width="480" height="140" rx="14" fill="#2a78d6" fill-opacity="0.07" stroke="#2a78d6" stroke-width="1.5"/>
+  <rect x="38" y="109" width="12" height="9" rx="2" fill="#2a78d6"/>
+  <path d="M40.5 109 v-3 a3.5 3.5 0 0 1 7 0 v3" fill="none" stroke="#2a78d6" stroke-width="1.8"/>
+  <text x="58" y="118" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="15" font-weight="700" fill="#2a78d6" text-anchor="start">SLOW</text>
+  <text x="114" y="118" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#52514e" text-anchor="start">code edits locked</text>
+  
+    <rect x="36" y="140" width="104" height="66" rx="8" fill="#ffffff" stroke="#c3c2b7"/>
+    <text x="88" y="169" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" font-weight="600" fill="#0b0b0b" text-anchor="middle">Intent</text>
+    <text x="88" y="188" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="11" font-weight="400" fill="#52514e" text-anchor="middle">in your words</text>
+  <line x1="140" y1="173" x2="154" y2="173" stroke="#52514e" stroke-width="1.5" marker-end="url(#ink)"/>
+  
+    <rect x="156" y="140" width="104" height="66" rx="8" fill="#ffffff" stroke="#c3c2b7"/>
+    <text x="208" y="169" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" font-weight="600" fill="#0b0b0b" text-anchor="middle">Beliefs</text>
+    <text x="208" y="188" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="11" font-weight="400" fill="#52514e" text-anchor="middle">checked first</text>
+  <line x1="260" y1="173" x2="274" y2="173" stroke="#52514e" stroke-width="1.5" marker-end="url(#ink)"/>
+  
+    <rect x="276" y="140" width="104" height="66" rx="8" fill="#ffffff" stroke="#c3c2b7"/>
+    <text x="328" y="169" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" font-weight="600" fill="#0b0b0b" text-anchor="middle">Teach-back</text>
+    <text x="328" y="188" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="11" font-weight="400" fill="#52514e" text-anchor="middle">you explain it</text>
+  <line x1="380" y1="173" x2="394" y2="173" stroke="#52514e" stroke-width="1.5" marker-end="url(#ink)"/>
+  
+    <rect x="396" y="140" width="104" height="66" rx="8" fill="#ffffff" stroke="#c3c2b7"/>
+    <text x="448" y="169" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" font-weight="600" fill="#0b0b0b" text-anchor="middle">Steps</text>
+    <text x="448" y="188" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="11" font-weight="400" fill="#52514e" text-anchor="middle">+ an estimate</text>
+
+  <!-- gate -->
+  <line x1="500" y1="173" x2="556" y2="173" stroke="#52514e" stroke-width="1.5" marker-end="url(#ink)"/>
+  <rect x="524" y="96" width="8" height="128" rx="4" fill="#0b0b0b"/>
+  <text x="528" y="248" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12" font-weight="400" fill="#0b0b0b" text-anchor="middle">sf fast</text>
+  <text x="528" y="264" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="11" font-weight="400" fill="#52514e" text-anchor="middle">checks the brief</text>
+
+  <!-- FAST -->
+  <rect x="560" y="90" width="380" height="140" rx="14" fill="#0ca30c" fill-opacity="0.07" stroke="#0ca30c" stroke-width="1.5"/>
+  <text x="578" y="118" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="15" font-weight="700" fill="#0ca30c" text-anchor="start">FAST</text>
+  <text x="630" y="118" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#52514e" text-anchor="start">one step at a time</text>
+  
+    <rect x="576" y="140" width="104" height="66" rx="8" fill="#ffffff" stroke="#c3c2b7"/>
+    <text x="628" y="169" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" font-weight="600" fill="#0b0b0b" text-anchor="middle">step 1</text>
+    <text x="628" y="188" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="11" font-weight="400" fill="#52514e" text-anchor="middle">verified ✓</text>
+  <line x1="680" y1="173" x2="694" y2="173" stroke="#52514e" stroke-width="1.5" marker-end="url(#ink)"/>
+  
+    <rect x="696" y="140" width="104" height="66" rx="8" fill="#ffffff" stroke="#c3c2b7"/>
+    <text x="748" y="169" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" font-weight="600" fill="#0b0b0b" text-anchor="middle">step 2</text>
+    <text x="748" y="188" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="11" font-weight="400" fill="#52514e" text-anchor="middle">verified ✓</text>
+  <line x1="800" y1="173" x2="814" y2="173" stroke="#52514e" stroke-width="1.5" marker-end="url(#ink)"/>
+  
+    <rect x="816" y="140" width="104" height="66" rx="8" fill="#ffffff" stroke="#c3c2b7"/>
+    <text x="868" y="169" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" font-weight="600" fill="#0b0b0b" text-anchor="middle">step n</text>
+    <text x="868" y="188" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11" font-weight="400" fill="#52514e" text-anchor="middle">sf done</text>
+
+  <!-- the way back -->
+  <path d="M750 230 V292 H260 V234" fill="none" stroke="#d03b3b" stroke-width="2" stroke-dasharray="7 5" marker-end="url(#back)"/>
+  <text x="505" y="318" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="12" font-weight="400" fill="#52514e" text-anchor="middle">past 2× your estimate, or a surprise: back to SLOW</text></svg>
+  <text x="80" y="1000" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="28" fill="#52514e">Open source. Claude Code today; Codex and Gemini adapters want testers.</text>
+  <text x="80" y="1090" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="30" fill="#0b0b0b">github.com/lorenzofamiglini/slowfirst</text>
+</svg>

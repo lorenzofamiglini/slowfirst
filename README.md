@@ -19,15 +19,10 @@ understanding is in. slowfirst puts that missing half of the pair back.
 Writing code is now the cheap part. **Understanding is the scarce part**, and drift is
 what happens when code gets ahead of it. So the work runs in two phases:
 
-```
-   SLOW                                    FAST
-   code edits locked                       edits unlocked, one step at a time
-   ────────────────────────────────►│────────────────────────────────────►
-   your intent, in your words       │      small steps, each verified
-   beliefs checked against reality  │      anything off-intent is refused
-   the AI quizzes you on the code   │      past 2x your estimate → back to SLOW
-                                  gate
-```
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/slowfirst-dark.svg">
+  <img alt="Code edits stay locked in SLOW until the brief passes the gate. FAST then runs in verified steps; going past twice your estimate, or hitting a surprise, sends you back to SLOW. An override can skip the gate, and is logged." src="docs/slowfirst-light.svg" width="100%">
+</picture>
 
 - **Nothing is generated until you can say what the problem is**, in your own words.
 - **"The bug is in the code" is a belief, not a fact.** It has to be checked, cheapest
