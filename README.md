@@ -130,7 +130,7 @@ You type these in the prompt. The AI can't run them, so it can't unlock itself.
 | `sf report` | Build the local dashboard from your personal memory |
 
 The same commands work in a terminal from a clone of this repo:
-`node bin/slowfirst.js <command>`. An npm package will come later. Commands that loosen
+`node bin/slowfirst.js <command>`. Commands that loosen
 the lock only run in an interactive terminal.
 
 ## The brief
