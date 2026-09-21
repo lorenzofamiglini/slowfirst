@@ -262,10 +262,9 @@ export function checkToolCall(root, call, env = {}) {
 
   if (call.kind !== 'edit') return { allow: true };
   const { phase } = store.currentState(store.readLog(root));
-  const realRoot = real(root);
   for (const file of call.paths) {
-    const rel = path.relative(realRoot, real(path.resolve(root, file))).split(path.sep).join('/');
-    if (rel.startsWith('../') || path.isAbsolute(rel)) continue; // outside the repo
+    const rel = relativeInRepo(root, file);
+    if (rel === null) continue; // outside the repo
     // Lower-cased because macOS and Windows file systems ignore case.
     if (rel.toLowerCase() === '.slowfirst/log.jsonl') {
       return { allow: false, reason: "[slowfirst] .slowfirst/log.jsonl is the human's record and only slowfirst writes to it." };
@@ -290,11 +289,30 @@ export function checkToolCall(root, call, env = {}) {
  */
 function real(p) {
   try {
-    return fs.realpathSync(p);
+    return (fs.realpathSync.native ?? fs.realpathSync)(p);
   } catch {
     const parent = path.dirname(p);
     return parent === p ? p : path.join(real(parent), path.basename(p));
   }
+}
+
+/**
+ * The file's path inside the repo, or null when it is outside.
+ * Both spellings are tried: on Windows git and Node disagree about short names
+ * (RUNNER~1) and drive-letter case, and a mismatch would read as "outside the
+ * repo", which silently lets an edit through.
+ * @param {string} root @param {string} file @returns {string | null}
+ */
+function relativeInRepo(root, file) {
+  const absolute = path.resolve(root, file);
+  for (const [base, target] of [
+    [root, absolute],
+    [real(root), real(absolute)],
+  ]) {
+    const rel = path.relative(base, target).split(path.sep).join('/');
+    if (rel && !rel.startsWith('../') && !path.isAbsolute(rel)) return rel;
+  }
+  return null;
 }
 
 /**
@@ -406,8 +424,8 @@ export function noteTurn(root, text, env = {}) {
  */
 export function afterEdit(root, file, env = {}) {
   if (!store.isActive(root)) return null;
-  const rel = path.relative(real(root), real(path.resolve(root, file))).split(path.sep).join('/');
-  if (rel.startsWith('../') || rel.startsWith('.slowfirst/')) return null;
+  const rel = relativeInRepo(root, file);
+  if (rel === null || rel.startsWith('.slowfirst/')) return null;
 
   const before = load(root);
   const stat = diffStat(root);
