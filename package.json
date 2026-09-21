@@ -1,6 +1,6 @@
 {
   "name": "slowfirst",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Keep the human's understanding ahead of the code: a slow phase (understand, no code) before a fast phase (small verified steps) for AI coding agents.",
   "type": "module",
   "bin": {

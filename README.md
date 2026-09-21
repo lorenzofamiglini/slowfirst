@@ -1,5 +1,7 @@
 # slowfirst
 
+[![tests](https://github.com/lorenzofamiglini/slowfirst/actions/workflows/test.yml/badge.svg)](https://github.com/lorenzofamiglini/slowfirst/actions/workflows/test.yml)
+
 **Understanding before code, enforced by your AI coding tool.**
 
 Five days hunting a bug that was never in the code. A local script that quietly became a
@@ -37,6 +39,14 @@ code until the gate opens.
 The rules are in [PROTOCOL.md](PROTOCOL.md), written to hold in any tool. This repo is
 the reference implementation: a Claude Code plugin, plus adapters for Codex CLI and
 Gemini CLI.
+
+## Status
+
+Early, and honest about it. The Claude Code plugin is tested in real sessions; the Codex
+CLI and Gemini CLI adapters are written against their docs and unit-tested but have not
+been run live. There is no field data yet: nobody has run it for a month and reported
+what it cost them. If you try it, [tell me where it got in your way](CONTRIBUTING.md) —
+that is worth more to this project than a pull request.
 
 ## Install (Claude Code)
 
@@ -180,7 +190,7 @@ ships: does it catch the bad tasks, how early, and does it stay quiet on the goo
 
 `sf report` in your agent, or `node bin/slowfirst.js report --open` in a terminal,
 builds a single local HTML page from your personal memory: no scripts, no network, light
-and dark.
+and dark. [See an example](https://htmlpreview.github.io/?https://github.com/lorenzofamiglini/slowfirst/blob/main/docs/dashboard-example.html) (made-up data).
 
 It keeps three kinds of number apart, on purpose:
 

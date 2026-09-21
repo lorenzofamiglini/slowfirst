@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>slowfirst</title>
+<style>
+  :root {
+    color-scheme: light;
+    --plane: #f9f9f7; --surface: #fcfcfb; --ink: #0b0b0b; --ink-2: #52514e; --muted: #898781;
+    --line: #e1e0d9; --axis: #c3c2b7; --border: rgba(11,11,11,0.10);
+    --ok: #0ca30c; --drift: #fab219; --waste: #d03b3b;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      color-scheme: dark;
+      --plane: #0d0d0d; --surface: #1a1a19; --ink: #fff; --ink-2: #c3c2b7; --muted: #898781;
+      --line: #2c2c2a; --axis: #383835; --border: rgba(255,255,255,0.10);
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; padding: 32px 16px 64px; background: var(--plane); color: var(--ink);
+         font: 15px/1.55 system-ui, -apple-system, "Segoe UI", sans-serif; }
+  main { max-width: 860px; margin: 0 auto; }
+  h1 { font-size: 22px; margin: 0 0 4px; }
+  h2 { font-size: 15px; margin: 0 0 12px; font-weight: 600; }
+  .sub { color: var(--ink-2); margin: 0 0 24px; }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 16px; }
+  .tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; margin-bottom: 16px; }
+  .tile { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 16px; }
+  .tile .value { font-size: 26px; font-weight: 600; }
+  .tile .label { color: var(--ink-2); font-size: 13px; margin-top: 2px; }
+  .tile .note { color: var(--muted); font-size: 12px; margin-top: 6px; }
+  .two { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; }
+  .two .card { margin-bottom: 0; }
+  svg { width: 100%; height: auto; display: block; }
+  .tick { fill: var(--muted); font-size: 10px; }
+  .axis { stroke: var(--axis); stroke-width: 1; }
+  .legend { display: flex; gap: 16px; flex-wrap: wrap; color: var(--ink-2); font-size: 13px; margin-bottom: 8px; }
+  .swatch { font-size: 12px; }
+  .key { display: inline-flex; gap: 6px; align-items: center; }
+  dl { display: grid; grid-template-columns: 1fr auto; gap: 6px 16px; margin: 0; }
+  dt { color: var(--ink-2); } dd { margin: 0; font-variant-numeric: tabular-nums; }
+  .scroll { overflow-x: auto; }
+  table { width: 100%; min-width: 480px; border-collapse: collapse; font-size: 13px; }
+  th { text-align: left; color: var(--muted); font-weight: 500; border-bottom: 1px solid var(--line); padding: 6px 8px 6px 0; }
+  td { padding: 6px 8px 6px 0; border-bottom: 1px solid var(--line); }
+  .num { text-align: right; font-variant-numeric: tabular-nums; }
+  .foot { color: var(--muted); font-size: 12px; margin: 12px 0 0; }
+  .tag { font-size: 11px; font-weight: 500; color: var(--ink-2); border: 1px solid var(--border); border-radius: 999px; padding: 2px 8px; margin-left: 6px; }
+  .estimate strong { font-size: 20px; }
+  .empty { color: var(--ink-2); }
+  code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.92em; }
+</style></head>
+<body><main>
+  <h1>slowfirst</h1>
+  <p class="sub">Your own tasks, as you labelled them. Everything here is local: nothing was sent anywhere.</p>
+  
+    <section class="tiles">
+      <div class="tile"><div class="value">29.4h</div><div class="label">tracked across tasks</div><div class="note">17 closed</div></div>
+      <div class="tile"><div class="value">20h</div><div class="label">in tasks you called drift or waste</div><div class="note">the number to drive down</div></div>
+      <div class="tile"><div class="value">18 min</div><div class="label">median time in SLOW per task</div><div class="note">what the gate costs you</div></div>
+      <div class="tile"><div class="value">16</div><div class="label">beliefs refuted and work stopped</div><div class="note">drift caught, not followed</div></div>
+    </section>
+
+    <section class="card">
+      <h2>Hours per week, by how the task ended</h2>
+      <div class="legend"><span class="key"><span class="swatch" style="color:var(--ok)">●</span>went as expected</span><span class="key"><span class="swatch" style="color:var(--drift)">▲</span>drifted</span><span class="key"><span class="swatch" style="color:var(--waste)">■</span>wasted time</span></div>
+      <svg viewBox="0 0 640 200" role="img" aria-label="Hours per week by outcome">
+    <line class="axis" x1="28" y1="180" x2="640" y2="180" />
+    <text class="tick" x="0" y="16">8.3h</text>
+    <text class="tick" x="0" y="176">0</text>
+    <text class="tick" x="66.3" y="196" text-anchor="middle">27/07</text><text class="tick" x="142.8" y="196" text-anchor="middle">03/08</text><rect x="196.3" y="95.2" width="45.9" height="82.8" rx="3" fill="var(--waste)"><title>week of 10/08: 4.4h wasted time</title></rect><rect x="196.3" y="37.3" width="45.9" height="55.8" rx="3" fill="var(--drift)"><title>week of 10/08: 3h drifted</title></rect><rect x="196.3" y="20.0" width="45.9" height="15.3" rx="3" fill="var(--ok)"><title>week of 10/08: 0.9h went as expected</title></rect><text class="tick" x="219.3" y="196" text-anchor="middle">10/08</text><rect x="272.8" y="83.6" width="45.9" height="94.4" rx="3" fill="var(--waste)"><title>week of 17/08: 5h wasted time</title></rect><rect x="272.8" y="70.1" width="45.9" height="11.5" rx="3" fill="var(--ok)"><title>week of 17/08: 0.7h went as expected</title></rect><text class="tick" x="295.8" y="196" text-anchor="middle">17/08</text><rect x="349.3" y="131.8" width="45.9" height="46.2" rx="3" fill="var(--drift)"><title>week of 24/08: 2.5h drifted</title></rect><rect x="349.3" y="99.0" width="45.9" height="30.8" rx="3" fill="var(--ok)"><title>week of 24/08: 1.7h went as expected</title></rect><text class="tick" x="372.3" y="196" text-anchor="middle">24/08</text><rect x="425.8" y="116.4" width="45.9" height="61.6" rx="3" fill="var(--waste)"><title>week of 31/08: 3.3h wasted time</title></rect><rect x="425.8" y="77.8" width="45.9" height="36.6" rx="3" fill="var(--ok)"><title>week of 31/08: 2h went as expected</title></rect><text class="tick" x="448.8" y="196" text-anchor="middle">31/08</text><rect x="502.3" y="145.3" width="45.9" height="32.7" rx="3" fill="var(--drift)"><title>week of 07/09: 1.8h drifted</title></rect><rect x="502.3" y="114.5" width="45.9" height="28.8" rx="3" fill="var(--ok)"><title>week of 07/09: 1.6h went as expected</title></rect><text class="tick" x="525.3" y="196" text-anchor="middle">07/09</text><rect x="578.8" y="129.9" width="45.9" height="48.1" rx="3" fill="var(--ok)"><title>week of 14/09: 2.6h went as expected</title></rect><text class="tick" x="601.8" y="196" text-anchor="middle">14/09</text>
+  </svg>
+      <p class="foot">Measured from your own logs. Labels are the word you typed at <code>sf done</code>.</p>
+    </section>
+
+    <section class="two">
+      <div class="card">
+        <h2>What the gates cost</h2>
+        <dl>
+          <dt>Median time in SLOW</dt><dd>18 min per task</dd>
+          <dt>Median task length</dt><dd>61 min</dd>
+          <dt>Gate attempts that failed</dt><dd>17</dd>
+          <dt>Overrides</dt><dd>3</dd>
+        </dl>
+        <p class="foot">Overrides on one gate, again and again, mean the gate is wrong. Fix the gate.</p>
+      </div>
+      <div class="card">
+        <h2>What they caught</h2>
+        <dl>
+          <dt>Beliefs checked and found false</dt><dd>9</dd>
+          <dt>Times work was stopped or sent back</dt><dd>7</dd>
+          <dt>Files touched that no step named</dt><dd>30</dd>
+          <dt>Intent changed mid-task</dt><dd>1</dd>
+        </dl>
+        <p class="foot">Each of these is a moment the work could have carried on in the wrong direction.</p>
+      </div>
+    </section>
+
+    <section class="card estimate">
+      <h2>Rework avoided <span class="tag">estimate, not a measurement</span></h2>
+      <p><strong>15.4h</strong>, on this assumption: work was stopped or sent back 7 times ×
+             50% of those assumed to have ended as waste × 4.4h, your own median wasted task.</p>
+             <p class="foot">Change the share and the number changes. It is a scale, not a fact: nobody can measure the hours a task would have burned had it continued.</p>
+    </section>
+
+    <section class="card">
+      <h2>Recent tasks</h2>
+      <div class="scroll"><table>
+        <thead><tr><th>date</th><th>repo</th><th>outcome</th><th>minutes</th><th>lines</th><th>off-plan files</th></tr></thead>
+        <tbody><tr><td>2026-09-17</td><td>web</td><td><span class="swatch" style="color:var(--ok)">●</span> went as expected</td><td class="num">57</td><td class="num">160</td><td class="num">0</td></tr><tr><td>2026-09-16</td><td>api</td><td><span class="swatch" style="color:var(--ok)">●</span> went as expected</td><td class="num">38</td><td class="num">160</td><td class="num">0</td></tr><tr><td>2026-09-15</td><td>etl</td><td><span class="swatch" style="color:var(--ok)">●</span> went as expected</td><td class="num">61</td><td class="num">160</td><td class="num">0</td></tr><tr><td>2026-09-11</td><td>api</td><td><span class="swatch" style="color:var(--ok)">●</span> went as expected</td><td class="num">44</td><td class="num">160</td><td class="num">0</td></tr><tr><td>2026-09-10</td><td>web</td><td><span class="swatch" style="color:var(--ok)">●</span> went as expected</td><td class="num">52</td><td class="num">160</td><td class="num">0</td></tr><tr><td>2026-09-09</td><td>billing</td><td><span class="swatch" style="color:var(--drift)">▲</span> drifted</td><td class="num">110</td><td class="num">160</td><td class="num">2</td></tr><tr><td>2026-09-04</td><td>etl</td><td><span class="swatch" style="color:var(--ok)">●</span> went as expected</td><td class="num">48</td><td class="num">160</td><td class="num">0</td></tr><tr><td>2026-09-03</td><td>api</td><td><span class="swatch" style="color:var(--ok)">●</span> went as expected</td><td class="num">70</td><td class="num">160</td><td class="num">0</td></tr><tr><td>2026-09-02</td><td>billing</td><td><span class="swatch" style="color:var(--waste)">■</span> wasted time</td><td class="num">195</td><td class="num">560</td><td class="num">5</td></tr><tr><td>2026-08-28</td><td>web</td><td><span class="swatch" style="color:var(--ok)">●</span> went as expected</td><td class="num">35</td><td class="num">160</td><td class="num">0</td></tr><tr><td>2026-08-27</td><td>api</td><td><span class="swatch" style="color:var(--ok)">●</span> went as expected</td><td class="num">65</td><td class="num">160</td><td class="num">0</td></tr><tr><td>2026-08-26</td><td>etl</td><td><span class="swatch" style="color:var(--drift)">▲</span> drifted</td><td class="num">150</td><td class="num">160</td><td class="num">3</td></tr></tbody>
+      </table></div>
+    </section>
+  <p class="foot">Generated 2026-09-18 18:00 from your personal memory.</p>
+</main></body></html>

@@ -1,0 +1,15 @@
+name: slowfirst got in my way
+description: A task where the gates cost more than they were worth. These are the control set: slowfirst must not slow this work.
+labels: [friction]
+body:
+  - type: textarea
+    attributes:
+      label: What were you doing?
+    validations: { required: true }
+  - type: textarea
+    attributes:
+      label: Which gate got in the way, and what did you have to type to get past it?
+    validations: { required: true }
+  - type: input
+    attributes:
+      label: Roughly how long did it cost you?

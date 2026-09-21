@@ -1,0 +1,33 @@
+name: An incident where AI-assisted work drifted
+description: A case where days went into the wrong direction. These become the held-out set the rules are tested against.
+labels: [incident]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Anonymise freely: no company names, no colleague names, no code. What matters is the shape of the drift, not the details.
+  - type: textarea
+    attributes:
+      label: What was the task meant to be?
+      placeholder: One or two sentences.
+    validations: { required: true }
+  - type: textarea
+    attributes:
+      label: What actually happened?
+      placeholder: Where did the work go instead, and for how long?
+    validations: { required: true }
+  - type: textarea
+    attributes:
+      label: What would have stopped it, and when?
+      description: The earliest observable moment where someone could have known.
+    validations: { required: true }
+  - type: dropdown
+    attributes:
+      label: Closest shape
+      options:
+        - A cause nobody had actually observed
+        - The goal changed without anyone deciding
+        - Built new instead of using what existed
+        - Grew past what anyone could explain
+        - Something else
+    validations: { required: true }
