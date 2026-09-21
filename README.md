@@ -2,7 +2,7 @@
 
 [![tests](https://github.com/lorenzofamiglini/slowfirst/actions/workflows/test.yml/badge.svg)](https://github.com/lorenzofamiglini/slowfirst/actions/workflows/test.yml)
 
-**Understanding before code, enforced by your AI coding tool.**
+**Pair programming with an AI that will not let you skip the understanding.**
 
 Five days hunting a bug that was never in the code. A local script that quietly became a
 production system. A ten-thousand-line rewrite of a library that already did the job,
@@ -11,8 +11,13 @@ which nobody on the team can explain.
 None of these start with a bad decision. They start with a plausible first step, and an
 AI that can produce ten more before anyone asks whether the first one was right.
 
+Pairing with a person does not fail this way. A colleague asks what you are doing and
+why, says the bug sounds like something else, and refuses to review a thousand-line
+diff. An AI does none of that: hand it a task and it starts, whatever state your
+understanding is in. slowfirst puts that missing half of the pair back.
+
 Writing code is now the cheap part. **Understanding is the scarce part**, and drift is
-what happens when code gets ahead of it. slowfirst puts that back in order:
+what happens when code gets ahead of it. So the work runs in two phases:
 
 ```
    SLOW                                    FAST
@@ -34,19 +39,27 @@ what happens when code gets ahead of it. slowfirst puts that back in order:
   skip is friction people uninstall.
 
 Not a linter, not a prompt, not a checklist. Your AI tool physically cannot edit the
-code until the gate opens.
+code until the gate opens. Delegation becomes pairing: you keep the problem, it keeps
+the typing.
 
 The rules are in [PROTOCOL.md](PROTOCOL.md), written to hold in any tool. This repo is
 the reference implementation: a Claude Code plugin, plus adapters for Codex CLI and
-Gemini CLI.
+Gemini CLI that nobody has run live yet.
 
 ## Status
 
-Early, and honest about it. The Claude Code plugin is tested in real sessions; the Codex
-CLI and Gemini CLI adapters are written against their docs and unit-tested but have not
-been run live. There is no field data yet: nobody has run it for a month and reported
-what it cost them. If you try it, [tell me where it got in your way](CONTRIBUTING.md) —
-that is worth more to this project than a pull request.
+Early, and honest about it.
+
+| | State |
+|---|---|
+| **Claude Code** | Tested in real sessions: the gate holds, the model stops, the budgets fire. |
+| **Codex CLI, Gemini CLI** | **Not tested against the live tools.** Written from each tool's published hook docs and covered by unit tests, which is not the same as working. Expect to be the first person to run them, and please report what breaks. |
+| **Any other tool** | Manual, through the terminal command. Nothing is enforced. |
+
+There is also no field data at all. Nobody has lived with slowfirst for a month and
+reported what it cost them, so treat every claim here as a hypothesis with a working
+implementation attached. If you try it, [tell me where it got in your
+way](CONTRIBUTING.md): that is worth more to this project than a pull request.
 
 ## Install (Claude Code)
 
@@ -60,8 +73,9 @@ nothing until you type `sf init` in a session inside that repo.
 
 ## Install (Codex CLI, Gemini CLI)
 
-These adapters follow each tool's published hook docs and are covered by unit tests.
-They haven't been run against the live CLIs yet, so please report what breaks.
+Untested against the real tools. They follow each tool's published hook docs and pass
+unit tests, so the shape should be right, but the first person to run them is doing the
+testing. If a hook misbehaves, your tool keeps working: a hook that errors is ignored.
 
 1. Clone this repo.
 2. Copy the hook config into your tool's settings, replacing `<path-to-slowfirst>` with

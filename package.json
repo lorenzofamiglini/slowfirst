@@ -18,6 +18,8 @@
     "claude-code",
     "pi",
     "agent-harness",
+    "pair-programming",
+    "ai-pair-programming",
     "developer-experience"
   ],
   "author": "Lorenzo Famiglini",
